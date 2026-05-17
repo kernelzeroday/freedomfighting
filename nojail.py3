@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
     nojail.py3 by @JusticeRage python3 port by @ice-wzl

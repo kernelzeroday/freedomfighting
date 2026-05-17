@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 """
 ersh.py by @JusticeRage, python3 port by @icewzl
 

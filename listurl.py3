@@ -1,7 +1,6 @@
-#!/usr/bin/env python2
-
+#!/usr/bin/env python3
 """
-    listurl.py by @JusticeRage
+    listurl.py by @JusticeRage, Python 3 port by @kernelzeroday
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,25 +20,25 @@
 import argparse
 import operator
 import os
-import Queue
+import queue as Queue
 import re
 import sys
 import threading
-import urlparse
+import urllib.parse as urlparse
 
 # Third party library imports
 try:
     from bs4 import BeautifulSoup
 except ImportError:
-    print "[\033[91m!\033[0m] BeautifulSoup is not installed! Please run '\033[93mpip install beautifulsoup4\033[0m' " \
-          "and launch this script again."
+    print("[\033[91m!\033[0m] BeautifulSoup is not installed! Please run '\033[93mpip install beautifulsoup4\033[0m' "
+          "and launch this script again.")
     sys.exit(1)
 
 try:
     import requests
 except ImportError:
-    print "[\033[91m!\033[0m] Requests is not installed! Please run '\033[93mpip install requests\033[0m' " \
-          "and launch this script again."
+    print("[\033[91m!\033[0m] Requests is not installed! Please run '\033[93mpip install requests\033[0m' "
+          "and launch this script again.")
     sys.exit(1)
 
 ARGS = None
@@ -78,7 +77,7 @@ def parse_arguments():
     args = parser.parse_args()
 
     if args.url is None:
-        print error("Please specify the URL to start from with the -u option.")
+        print(error("Please specify the URL to start from with the -u option."))
         parser.print_help()
         sys.exit(1)
 
@@ -88,14 +87,14 @@ def parse_arguments():
         cookie_dict = {}
         for c in args.cookie:
             if c.count('=') != 1:
-                print error("Input cookie should be in the form key=value (received: %s)!" % c)
+                print(error("Input cookie should be in the form key=value (received: %s)!" % c))
                 sys.exit(1)
             cookie = c.split('=')
             cookie_dict[cookie[0]] = cookie[1]
         COOKIES = requests.utils.cookiejar_from_dict(cookie_dict)
 
     if args.output_file and os.path.exists(args.output_file):
-        print error("%s already exists! Aborting to avoid overwriting it." % args.output_file)
+        print(error("%s already exists! Aborting to avoid overwriting it." % args.output_file))
         sys.exit(1)
 
     return args
@@ -141,10 +140,10 @@ class PrinterThread(threading.Thread):
             try:
                 message = self.pq.get(timeout=2)
                 if message and message.__str__()[-1] == '\r':
-                    print message,
+                    print(message, end=' ')
                     sys.stdout.flush()
                 else:
-                    print message
+                    print(message)
                 self.pq.task_done()
             except Queue.Empty:
                 if not self.alive:
@@ -354,11 +353,11 @@ class RequesterThread(threading.Thread):
 
                 # HTTP error: log and proceed to the next URL.
                 except requests.exceptions.SSLError as e:
-                    PRINT_QUEUE.put(error(e.message.__str__()))
+                    PRINT_QUEUE.put(error(str(e)))
                     PRINT_QUEUE.put(error("An SSL error was detected. If this is expected, please re-run the program "
                                           "with --no-certificate-check (-n)."))
                 except requests.RequestException as e:
-                    PRINT_QUEUE.put(error(e.message.__str__()))
+                    PRINT_QUEUE.put(error(str(e)))
 
                 self.iq.task_done()
         except Queue.Empty:  # No more items to process. Let the thread die.

